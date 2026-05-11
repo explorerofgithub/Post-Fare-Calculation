@@ -52,6 +52,9 @@ function updatePreviewFare(event) {
 
     const { fare, currencySymbol } = getFareFromInputs();
     fareResult.textContent = `${translations[currentLang]['preview_fare']} ${currencySymbol}${fare}`;
+    
+    // 選擇國家改變時，一併更新尺寸資訊
+    updateSizeInfo();
 }
 
 function calculateFare() {
@@ -89,15 +92,15 @@ function calculateFare() {
 
     const listItem = document.createElement('li');
     // 套用收據樣式，包含撕邊效果的 class
-    listItem.className = 'receipt animate-slide-in bg-stone-100 p-4 pb-6 rounded-t-lg shadow-sm border-x border-t border-stone-300';
+    listItem.className = 'receipt animate-slide-in bg-white/60 backdrop-blur-sm p-4 pb-6 rounded-t-lg shadow-sm border-x border-t border-white/50';
     
     listItem.innerHTML = `
         <div class="flex justify-between items-start mb-2">
-            <div class="font-mono text-xs text-stone-500 flex flex-col gap-1">
+            <div class="font-mono text-xs text-stone-600 flex flex-col gap-1">
                 <span class="route-text" data-origin="${originCountry}" data-dest="${destCountry}">${originName} &rarr; ${destName}</span>
                 <span>${new Date().toLocaleString()}</span>
             </div>
-            <button class="delete-btn text-stone-400 hover:text-orange-600 transition-colors p-1 -mt-1 -mr-1 text-sm leading-none" title="${translations[currentLang]['delete_title']}" data-i18n-title="delete_title">
+            <button class="delete-btn text-stone-500 hover:text-orange-600 transition-colors p-1 -mt-1 -mr-1 text-sm leading-none" title="${translations[currentLang]['delete_title']}" data-i18n-title="delete_title">
                 &#10005;
             </button>
         </div>
@@ -118,7 +121,7 @@ function calculateFare() {
         listItem.remove();
         // 如果刪除後沒有其他紀錄，則重新顯示「尚無查詢紀錄」
         if (historyList.children.length === 0) {
-                historyList.innerHTML = `<li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
+                historyList.innerHTML = `<li id="emptyMsg" class="text-stone-700 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
         }
     });
 
@@ -127,7 +130,7 @@ function calculateFare() {
 
 function clearHistory() {
     const historyList = document.getElementById('historyList');
-    historyList.innerHTML = `<li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
+    historyList.innerHTML = `<li id="emptyMsg" class="text-stone-700 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
 }
 
 function updateLanguage() {
@@ -188,6 +191,49 @@ function updateLanguage() {
 function toggleLanguage() {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     updateLanguage();
+}
+
+let isSizeInfoExpanded = false;
+
+function toggleSizeInfo() {
+    isSizeInfoExpanded = !isSizeInfoExpanded;
+    const content = document.getElementById('sizeInfoContent');
+    const btn = document.getElementById('toggleSizeBtn');
+    
+    if (isSizeInfoExpanded) {
+        content.classList.remove('hidden');
+        content.classList.add('flex');
+        btn.setAttribute('data-i18n', 'hide_size_btn');
+        btn.textContent = translations[currentLang]['hide_size_btn'];
+        updateSizeInfo(); // 展開時確保資料是最新的
+    } else {
+        content.classList.remove('flex');
+        content.classList.add('hidden');
+        btn.setAttribute('data-i18n', 'view_size_btn');
+        btn.textContent = translations[currentLang]['view_size_btn'];
+    }
+}
+
+function updateSizeInfo() {
+    const originCountry = document.getElementById('originCountry').value;
+    if (!originCountry || typeof postcardFormats === 'undefined') return;
+    
+    const regionSpan = document.getElementById('originSizeRegion');
+    const textSpan = document.getElementById('originSizeText');
+    const stampFlag = document.getElementById('stampFlag');
+    
+    if (regionSpan && textSpan) {
+        regionSpan.textContent = getCountryName(originCountry);
+        textSpan.textContent = postcardFormats[currentLang][originCountry] || '-';
+    }
+
+    if (stampFlag) {
+        const flags = {
+            'TW': '🇹🇼', 'US': '🇺🇸', 'JP': '🇯🇵', 'KR': '🇰🇷',
+            'EU': '🇪🇺', 'HK': '🇭🇰', 'CA': '🇨🇦', 'DE': '🇩🇪'
+        };
+        stampFlag.textContent = flags[originCountry] || '📮';
+    }
 }
 
 // --- NEW: Add event listeners for real-time updates ---

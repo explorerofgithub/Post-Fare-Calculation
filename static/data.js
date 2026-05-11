@@ -69,7 +69,11 @@ const translations = {
         'qty_text': '明信片數量:',
         'total_text': '總計:',
         'delete_title': '刪除此紀錄',
-        'lang_toggle': 'English'
+        'lang_toggle': 'English',
+        'view_size_btn': '📐 查看寄件地明信片尺寸',
+        'hide_size_btn': '🔺 收起尺寸資訊',
+        'stamp_hint': '※ 貼心提醒：國際郵件請將郵票貼於右上角',
+        'recipient_address': '收件人地址'
     },
     'en': {
         'app_title': '📮 Instant Postcard Fare Calculator',
@@ -85,7 +89,34 @@ const translations = {
         'qty_text': 'Quantity:',
         'total_text': 'Total:',
         'delete_title': 'Delete record',
-        'lang_toggle': '中文'
+        'lang_toggle': '中文',
+        'view_size_btn': '📐 View Origin Postcard Size',
+        'hide_size_btn': '🔺 Hide Size Info',
+        'stamp_hint': '※ Note: Place the stamp in the top right corner',
+        'recipient_address': 'Recipient Address'
+    }
+};
+
+const postcardFormats = {
+    'zh': {
+        'TW': '10.5 x 14.8 cm (標準 A6)',
+        'JP': '10.0 x 14.8 cm',
+        'US': '8.9 x 12.7 cm ~ 10.8 x 15.2 cm',
+        'KR': '10.5 x 14.8 cm (標準 A6)',
+        'EU': '10.5 x 14.8 cm (標準 A6)',
+        'HK': '9 x 14 cm ~ 12.2 x 23.5 cm',
+        'CA': '最高 12 x 23.5 cm',
+        'DE': '10.5 x 14.8 cm (標準 A6)'
+    },
+    'en': {
+        'TW': '10.5 x 14.8 cm (Standard A6)',
+        'JP': '10.0 x 14.8 cm',
+        'US': '3.5" x 5" ~ 4.25" x 6"',
+        'KR': '10.5 x 14.8 cm (Standard A6)',
+        'EU': '10.5 x 14.8 cm (Standard A6)',
+        'HK': '9 x 14 cm ~ 12.2 x 23.5 cm',
+        'CA': 'Max 12 x 23.5 cm',
+        'DE': '10.5 x 14.8 cm (Standard A6)'
     }
 };
 

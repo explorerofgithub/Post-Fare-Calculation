@@ -78,44 +78,70 @@
         .animate-slide-in {
             animation: slideInDown 0.4s ease-out forwards;
         }
+
+        /* 底部動畫：郵差穿越螢幕效果 */
+        @keyframes walkAcross {
+            0% { transform: translateX(-20vw); }
+            100% { transform: translateX(120vw); }
+        }
+        .animate-postman {
+            animation: walkAcross 15s linear infinite;
+        }
+
+        /* 郵票打孔波浪邊緣效果 */
+        .stamp-edge {
+            background: radial-gradient(circle, transparent 2px, rgba(255, 241, 242, 1) 2.5px) -2px -2px;
+            background-size: 8px 8px;
+            border: 1px dashed #fb7185;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
-<body class="text-stone-800 flex items-center justify-center min-h-screen antialiased font-sans p-4 relative overflow-hidden" 
-      style="background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2048&auto=format&fit=crop'); background-size: cover; background-position: center;">
+<body class="text-stone-800 flex flex-col items-center justify-center min-h-screen antialiased font-sans p-4 py-16 relative overflow-x-hidden overflow-y-auto gap-6">
+
+<!-- 滿版背景圖片：根據裝置螢幕寬度自動切換圖片 -->
+<div class="absolute inset-0 -z-20 bg-stone-300 overflow-hidden">
+    <picture>
+        <source media="(min-width: 768px)" srcset="./static/postcard_web.png">
+        <img src="./static/postcard_phone.png" alt="background" class="absolute top-0 left-0 w-full h-full object-cover pointer-events-none">
+    </picture>
+</div>
 
 <!-- 吉卜力風格：柔和溫暖的環境光與微透毛玻璃效果 -->
-<div class="absolute inset-0 bg-stone-300/30 backdrop-blur-[2px]"></div>
+<div class="absolute inset-0 bg-stone-300/30 backdrop-blur-[2px] -z-10 pointer-events-none"></div>
 
 <!-- 語言切換按鈕 -->
 <button id="langToggleBtn" onclick="toggleLanguage()" class="absolute top-4 right-4 z-50 bg-stone-50/80 hover:bg-stone-50 text-emerald-800 font-bold py-2 px-4 rounded-full shadow backdrop-blur-sm transition-all border border-stone-200">
     English
 </button>
 
-<div class="z-10 relative flex flex-col md:flex-row gap-8 w-full max-w-4xl justify-center items-stretch">
+<!-- 外層容器：放寬最大寬度，並設定手機版置中、桌面版靠上對齊以利獨立縮放 -->
+<div class="z-10 relative flex flex-col md:flex-row gap-8 w-full max-w-[95vw] xl:max-w-6xl justify-center items-center md:items-start transition-all">
     <!-- 左側卡片：運費計算器 -->
-    <div class="bg-stone-50/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full max-w-sm border border-stone-200 flex flex-col relative overflow-hidden">
+    <div class="bg-stone-50/40 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full md:w-[380px] min-w-[280px] min-h-[480px] border border-white/50 flex flex-col relative overflow-hidden resize transition-colors hover:bg-stone-50/50">
         <!-- 裝飾用自然綠意邊條 -->
         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-600 via-lime-200 to-emerald-600"></div>
-        <h2 class="text-3xl font-bold mb-6 mt-2 text-center text-emerald-800 drop-shadow-sm" data-i18n="app_title">📮 即時明信片郵資換算</h2>
+        
+        <h2 class="text-3xl font-bold mb-6 text-center text-emerald-800 drop-shadow-sm" data-i18n="app_title">📮 即時明信片郵資換算</h2>
 
         <div class="mb-4 flex gap-3">
             <div class="flex-1">
                 <label for="originCountry" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="origin_label">寄件地:</label>
-                <select id="originCountry" class="w-full px-3 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
+                <select id="originCountry" class="w-full px-3 py-3 bg-white/60 backdrop-blur-sm border-stone-300/50 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
             </div>
             <div class="flex-1">
                 <label for="destCountry" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="dest_label">收件地:</label>
-                <select id="destCountry" class="w-full px-3 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
+                <select id="destCountry" class="w-full px-3 py-3 bg-white/60 backdrop-blur-sm border-stone-300/50 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
             </div>
         </div>
 
         <div class="mb-4">
             <label for="quantity" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="quantity_label">明信片數量:</label>
-            <input type="number" id="quantity" placeholder="請輸入數量" data-i18n-placeholder="quantity_placeholder" value="1" min="1" class="w-full px-4 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 transition-colors shadow-inner text-stone-800 placeholder-stone-400">
+            <input type="number" id="quantity" placeholder="請輸入數量" data-i18n-placeholder="quantity_placeholder" value="1" min="1" class="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border-stone-300/50 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 transition-colors shadow-inner text-stone-800 placeholder-stone-600">
         </div>
 
         <!-- 3D 按壓效果按鈕 -->
-        <button id="calcBtn" onclick="calculateFare()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-stone-50 font-bold py-3 px-4 rounded-xl shadow-[0_5px_0_rgb(4,120,87)] active:shadow-[0_0px_0_rgb(4,120,87)] active:translate-y-[5px] transition-all mt-auto" data-i18n="calc_btn">計算郵資</button>
+        <button id="calcBtn" onclick="calculateFare()" class="w-full bg-emerald-700/90 hover:bg-emerald-600 text-stone-50 font-bold py-3 px-4 rounded-xl shadow-[0_5px_0_rgb(4,120,87)] active:shadow-[0_0px_0_rgb(4,120,87)] active:translate-y-[5px] transition-all mt-auto" data-i18n="calc_btn">計算郵資</button>
 
         <p id="fareResult" class="mt-6 text-center text-lg font-bold text-emerald-800 min-h-[1.75rem]"></p>
 
@@ -134,16 +160,54 @@
     </div>
 
     <!-- 右側卡片：歷史紀錄 -->
-    <div class="bg-stone-50/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full max-w-sm border border-stone-200 flex flex-col">
+    <div class="bg-stone-50/40 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full md:w-[380px] min-w-[280px] min-h-[480px] border border-white/50 flex flex-col relative overflow-hidden resize transition-colors hover:bg-stone-50/50">
         <h2 class="text-2xl font-bold mb-6 text-center text-emerald-800 drop-shadow-sm" data-i18n="history_title">🗂️ 郵資查詢紀錄</h2>
         <ul id="historyList" class="flex-1 overflow-y-auto space-y-3 max-h-[250px] md:max-h-[300px] pr-2">
-            <li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">尚無查詢紀錄</li>
+            <li id="emptyMsg" class="text-stone-700 text-center italic mt-4" data-i18n="empty_msg">尚無查詢紀錄</li>
         </ul>
         
         <!-- 清空紀錄按鈕 -->
-        <button onclick="clearHistory()" class="mt-6 w-full bg-stone-50 border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-medium py-2 px-4 rounded-xl shadow-[0_4px_0_rgb(253,186,116)] active:shadow-[0_0px_0_rgb(253,186,116)] active:translate-y-[4px] transition-all" data-i18n="clear_btn">
+        <button onclick="clearHistory()" class="mt-6 w-full bg-white/60 backdrop-blur-sm border-2 border-orange-200/80 text-orange-700 hover:bg-orange-50 font-medium py-2 px-4 rounded-xl shadow-[0_4px_0_rgba(253,186,116,0.5)] active:shadow-[0_0px_0_rgb(253,186,116)] active:translate-y-[4px] transition-all" data-i18n="clear_btn">
             🗑️ 清除紀錄
         </button>
+    </div>
+</div>
+
+<!-- 下方卡片：明信片格式參考 (可展開) -->
+<div class="z-10 relative bg-stone-50/40 backdrop-blur-md p-4 rounded-3xl shadow-[0_10px_30px_-15px_rgba(4,120,87,0.4)] w-full max-w-[95vw] xl:max-w-6xl border border-white/50 flex flex-col transition-colors hover:bg-stone-50/50 items-center justify-center">
+    <button id="toggleSizeBtn" onclick="toggleSizeInfo()" class="text-emerald-800 font-bold hover:text-emerald-600 transition-colors flex items-center justify-center w-full" data-i18n="view_size_btn">
+        📐 查看寄件地明信片尺寸
+    </button>
+    <div id="sizeInfoContent" class="hidden w-full mt-4 border-t border-white/50 pt-4 flex-col items-center justify-center animate-slide-in">
+        <div class="flex flex-col text-sm text-stone-700 bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/50 shadow-sm text-center min-w-[200px]">
+            <span id="originSizeRegion" class="font-bold text-emerald-700 mb-2 text-lg"></span>
+            <span id="originSizeText" class="text-base font-mono mb-4"></span>
+            
+            <!-- 明信片圖像參照 (使用 CSS 繪製) -->
+            <div class="relative w-56 h-36 bg-stone-100 border-2 border-stone-300 shadow-inner rounded-sm mx-auto flex overflow-hidden">
+                <!-- 左側：留言區 -->
+                <div class="w-1/2 h-full border-r-2 border-stone-300 border-dashed flex items-center justify-center text-stone-400 bg-stone-50">
+                    <span class="rotate-[-10deg] italic opacity-50">Message...</span>
+                </div>
+                <!-- 右側：地址與郵票 -->
+                <div class="w-1/2 h-full relative p-3 flex flex-col justify-end bg-stone-50">
+                    <!-- 郵票張貼位置標示 -->
+                    <div class="absolute top-2 right-2 w-10 h-12 stamp-edge flex flex-col items-center justify-center p-0.5 transform rotate-3">
+                        <span id="stampFlag" class="text-[22px] leading-none select-none drop-shadow-sm">📮</span>
+                    </div>
+                    
+                    <!-- 收件人地址標示 -->
+                    <div class="text-[10px] text-stone-500 font-bold mb-1" data-i18n="recipient_address">收件人地址</div>
+
+                    <!-- 地址對齊線 -->
+                    <div class="w-[90%] border-b border-stone-400 mb-3 opacity-60"></div>
+                    <div class="w-[90%] border-b border-stone-400 mb-3 opacity-60"></div>
+                    <div class="w-[90%] border-b border-stone-400 mb-1 opacity-60"></div>
+                </div>
+            </div>
+            
+            <p class="text-xs text-stone-500 mt-3 font-medium" data-i18n="stamp_hint">※ 貼心提醒：國際郵件請將郵票貼於右上角</p>
+        </div>
     </div>
 </div>
 
