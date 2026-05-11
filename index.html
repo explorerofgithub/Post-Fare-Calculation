@@ -8,8 +8,8 @@
         /* 美化滾動條 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.3); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(4, 120, 87, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(4, 120, 87, 0.6); }
 
         /* 信封飛出動畫 */
         @keyframes flyOut {
@@ -80,80 +80,75 @@
         }
     </style>
 </head>
-<body class="text-slate-800 flex items-center justify-center min-h-screen antialiased font-sans p-4 relative overflow-hidden" 
-      style="background-image: url('https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=2048&auto=format&fit=crop'); background-size: cover; background-position: center;">
+<body class="text-stone-800 flex items-center justify-center min-h-screen antialiased font-sans p-4 relative overflow-hidden" 
+      style="background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2048&auto=format&fit=crop'); background-size: cover; background-position: center;">
 
-<!-- 現代風格的亮色半透明遮罩 -->
-<div class="absolute inset-0 bg-slate-200/60 backdrop-blur-sm"></div>
+<!-- 吉卜力風格：柔和溫暖的環境光與微透毛玻璃效果 -->
+<div class="absolute inset-0 bg-stone-300/30 backdrop-blur-[2px]"></div>
+
+<!-- 語言切換按鈕 -->
+<button id="langToggleBtn" onclick="toggleLanguage()" class="absolute top-4 right-4 z-50 bg-stone-50/80 hover:bg-stone-50 text-emerald-800 font-bold py-2 px-4 rounded-full shadow backdrop-blur-sm transition-all border border-stone-200">
+    English
+</button>
 
 <div class="z-10 relative flex flex-col md:flex-row gap-8 w-full max-w-4xl justify-center items-stretch">
     <!-- 左側卡片：運費計算器 -->
-    <div class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.15)] w-full max-w-sm border border-white flex flex-col relative overflow-hidden">
-        <!-- 裝飾用郵局紅藍邊條 -->
-        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 via-white to-blue-500"></div>
-        <h2 class="text-3xl font-bold mb-6 mt-2 text-center text-teal-700 drop-shadow-sm">📮 現代郵務所</h2>
+    <div class="bg-stone-50/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full max-w-sm border border-stone-200 flex flex-col relative overflow-hidden">
+        <!-- 裝飾用自然綠意邊條 -->
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-600 via-lime-200 to-emerald-600"></div>
+        <h2 class="text-3xl font-bold mb-6 mt-2 text-center text-emerald-800 drop-shadow-sm" data-i18n="app_title">📮 即時明信片郵資換算</h2>
 
         <div class="mb-4 flex gap-3">
             <div class="flex-1">
-                <label for="originCountry" class="block text-sm font-bold text-slate-600 mb-2 tracking-wider">寄件地:</label>
-                <select id="originCountry" class="w-full px-3 py-3 bg-white border-slate-200 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-teal-500 text-slate-800 transition-colors shadow-inner">
-                    <option value="TW">台灣</option>
-                    <option value="US">美國</option>
-                    <option value="JP">日本</option>
-                    <option value="KR">韓國</option>
-                </select>
+                <label for="originCountry" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="origin_label">寄件地:</label>
+                <select id="originCountry" class="w-full px-3 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
             </div>
             <div class="flex-1">
-                <label for="destCountry" class="block text-sm font-bold text-slate-600 mb-2 tracking-wider">收件地:</label>
-                <select id="destCountry" class="w-full px-3 py-3 bg-white border-slate-200 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-teal-500 text-slate-800 transition-colors shadow-inner">
-                    <option value="TW">台灣</option>
-                    <option value="US">美國</option>
-                    <option value="JP">日本</option>
-                    <option value="KR">韓國</option>
-                </select>
+                <label for="destCountry" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="dest_label">收件地:</label>
+                <select id="destCountry" class="w-full px-3 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 text-stone-800 transition-colors shadow-inner"></select>
             </div>
         </div>
 
         <div class="mb-4">
-            <label for="quantity" class="block text-sm font-bold text-slate-600 mb-2 tracking-wider">明信片數量:</label>
-            <input type="number" id="quantity" placeholder="請輸入數量" value="1" min="1" class="w-full px-4 py-3 bg-white border-slate-200 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-teal-500 transition-colors shadow-inner text-slate-800 placeholder-slate-400">
+            <label for="quantity" class="block text-sm font-bold text-stone-700 mb-2 tracking-wider" data-i18n="quantity_label">明信片數量:</label>
+            <input type="number" id="quantity" placeholder="請輸入數量" data-i18n-placeholder="quantity_placeholder" value="1" min="1" class="w-full px-4 py-3 bg-stone-50 border-stone-300 border-2 rounded-xl focus:outline-none focus:ring-0 focus:border-emerald-600 transition-colors shadow-inner text-stone-800 placeholder-stone-400">
         </div>
 
         <!-- 3D 按壓效果按鈕 -->
-        <button id="calcBtn" onclick="calculateFare()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_5px_0_rgb(17,94,89)] active:shadow-[0_0px_0_rgb(17,94,89)] active:translate-y-[5px] transition-all mt-auto">計算郵資</button>
+        <button id="calcBtn" onclick="calculateFare()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-stone-50 font-bold py-3 px-4 rounded-xl shadow-[0_5px_0_rgb(4,120,87)] active:shadow-[0_0px_0_rgb(4,120,87)] active:translate-y-[5px] transition-all mt-auto" data-i18n="calc_btn">計算郵資</button>
 
-        <p id="fareResult" class="mt-6 text-center text-lg font-bold text-teal-700 min-h-[1.75rem]"></p>
+        <p id="fareResult" class="mt-6 text-center text-lg font-bold text-emerald-800 min-h-[1.75rem]"></p>
 
         <!-- 信封動畫元素 -->
         <div id="envelopeAnimation" class="absolute bottom-1/2 left-1/2 -translate-x-1/2 translate-y-1/2 opacity-0 pointer-events-none z-20">
             <svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- 信封主體 -->
-                <rect x="0" y="10" width="80" height="50" fill="#F3F4F6"/>
-                <!-- 上蓋 (閉合狀態) -->
-                <path d="M0 10L40 40L80 10L0 10Z" fill="#E5E7EB"/>
-                <!-- 左側蓋 -->
-                <path d="M0 10L0 60L40 40L0 10Z" fill="#D1D5DB"/>
-                <!-- 右側蓋 -->
-                <path d="M80 10L80 60L40 40L80 10Z" fill="#D1D5DB"/>
+                <!-- 吉卜力感牛皮紙信封主體 -->
+                <rect x="0" y="10" width="80" height="50" fill="#fafaf9"/>
+                <!-- 上蓋 -->
+                <path d="M0 10L40 40L80 10L0 10Z" fill="#f5f5f4"/>
+                <!-- 兩側蓋 -->
+                <path d="M0 10L0 60L40 40L0 10Z" fill="#e7e5e4"/>
+                <path d="M80 10L80 60L40 40L80 10Z" fill="#e7e5e4"/>
             </svg>
         </div>
     </div>
 
     <!-- 右側卡片：歷史紀錄 -->
-    <div class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.15)] w-full max-w-sm border border-white flex flex-col">
-        <h2 class="text-2xl font-bold mb-6 text-center text-blue-700 drop-shadow-sm">🗂️ 郵資查詢紀錄</h2>
+    <div class="bg-stone-50/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_20px_50px_-15px_rgba(4,120,87,0.4)] w-full max-w-sm border border-stone-200 flex flex-col">
+        <h2 class="text-2xl font-bold mb-6 text-center text-emerald-800 drop-shadow-sm" data-i18n="history_title">🗂️ 郵資查詢紀錄</h2>
         <ul id="historyList" class="flex-1 overflow-y-auto space-y-3 max-h-[250px] md:max-h-[300px] pr-2">
-            <li id="emptyMsg" class="text-slate-400 text-center italic mt-4">尚無查詢紀錄</li>
+            <li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">尚無查詢紀錄</li>
         </ul>
         
         <!-- 清空紀錄按鈕 -->
-        <button onclick="clearHistory()" class="mt-6 w-full bg-white border-2 border-rose-200 text-rose-500 hover:bg-rose-50 font-medium py-2 px-4 rounded-xl shadow-[0_4px_0_rgb(254,205,211)] active:shadow-[0_0px_0_rgb(254,205,211)] active:translate-y-[4px] transition-all">
+        <button onclick="clearHistory()" class="mt-6 w-full bg-stone-50 border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-medium py-2 px-4 rounded-xl shadow-[0_4px_0_rgb(253,186,116)] active:shadow-[0_0px_0_rgb(253,186,116)] active:translate-y-[4px] transition-all" data-i18n="clear_btn">
             🗑️ 清除紀錄
         </button>
     </div>
 </div>
 
 <!-- 引入外部 JavaScript -->
+<script src="./static/data.js"></script>
 <script src="./static/fare_calculators.js"></script>
 </body>
 </html>

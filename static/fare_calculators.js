@@ -1,72 +1,7 @@
-// 郵資費率表 (單位：元/張)
-// 根據中華郵政國際明信片資費更新：美國 11 元，日本及韓國 (亞洲) 10 元
-const fareTable = {
-    'TW-TW': 5,    // 台灣國內
-    'TW-US': 11,
-    'TW-JP': 10,
-    'TW-KR': 10,
-    'TW-EU': 12, // 歐洲
-    'TW-HK': 6,  // 香港
-    'TW-CA': 11, // 加拿大
-    'TW-DE': 12, // 德國 (同歐洲費率)
-    'US-US': 0.61, // 美國國內
-    'US-TW': 1.70,
-    'US-JP': 1.70,
-    'US-KR': 1.70,
-    'US-EU': 1.70,
-    'US-HK': 1.70,
-    'US-CA': 1.70,
-    'US-DE': 1.70,
-    'JP-JP': 85,   // 日本國內
-    'JP-TW': 100,
-    'JP-US': 100,
-    'JP-KR': 100,
-    'JP-EU': 100,
-    'JP-HK': 100,
-    'JP-CA': 100,
-    'JP-DE': 100,
-    'KR-KR': 400,  // 韓國國內
-    'KR-TW': 430,
-    'KR-US': 430,
-    'KR-JP': 430,
-    'KR-EU': 430,
-    'KR-HK': 430,
-    'KR-CA': 430,
-    'KR-DE': 430,
-    'CA-CA': 1.44, // 加拿大國內 (2026 標準郵資)
-    'CA-TW': 3.65, // 加拿大寄國際
-    'CA-US': 1.75, // 加拿大寄美國
-    'CA-JP': 3.65,
-    'CA-KR': 3.65,
-    'CA-EU': 3.65,
-    'CA-HK': 3.65,
-    'CA-DE': 3.65,
-    'DE-DE': 0.95, // 德國國內明信片
-    'DE-TW': 1.25, // 德國寄國際明信片
-    'DE-US': 1.25,
-    'DE-JP': 1.25,
-    'DE-KR': 1.25,
-    'DE-EU': 1.25,
-    'DE-HK': 1.25,
-    'DE-CA': 1.25,
-    'EU-EU': 1.20, // 歐洲境內 (預設參考)
-    'HK-HK': 2.2   // 香港國內
-};
-const defaultFare = 10; // 找不到對應航線時的預設費率
+let currentLang = 'zh';
 
 function getCountryName(code) {
-    const names = {
-        'TW': '台灣',
-        'US': '美國',
-        'JP': '日本',
-        'KR': '韓國',
-        'EU': '歐洲',
-        'HK': '香港'
-        'HK': '香港',
-        'CA': '加拿大',
-        'DE': '德國'
-    };
-    return names[code] || code;
+    return countryNames[currentLang][code] || code;
 }
 
 function getCurrencySymbol(code) {
@@ -76,7 +11,6 @@ function getCurrencySymbol(code) {
         'JP': '¥',
         'KR': '₩',
         'EU': '€',
-        'HK': 'HK$'
         'HK': 'HK$',
         'CA': 'C$',
         'DE': '€'
@@ -114,10 +48,10 @@ function updatePreviewFare(event) {
     calcBtn.disabled = false;
     calcBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     fareResult.classList.remove('text-rose-600');
-    fareResult.classList.add('text-teal-700');
+    fareResult.classList.add('text-emerald-800');
 
     const { fare, currencySymbol } = getFareFromInputs();
-    fareResult.textContent = `預估郵資: ${currencySymbol}${fare}`;
+    fareResult.textContent = `${translations[currentLang]['preview_fare']} ${currencySymbol}${fare}`;
 }
 
 function calculateFare() {
@@ -155,26 +89,26 @@ function calculateFare() {
 
     const listItem = document.createElement('li');
     // 套用收據樣式，包含撕邊效果的 class
-    listItem.className = 'receipt animate-slide-in bg-gray-50 p-4 pb-6 rounded-t-lg shadow-sm border-x border-t border-gray-200';
+    listItem.className = 'receipt animate-slide-in bg-stone-100 p-4 pb-6 rounded-t-lg shadow-sm border-x border-t border-stone-300';
     
     listItem.innerHTML = `
         <div class="flex justify-between items-start mb-2">
-            <div class="font-mono text-xs text-slate-500 flex flex-col gap-1">
-                <span>${originName} &rarr; ${destName}</span>
+            <div class="font-mono text-xs text-stone-500 flex flex-col gap-1">
+                <span class="route-text" data-origin="${originCountry}" data-dest="${destCountry}">${originName} &rarr; ${destName}</span>
                 <span>${new Date().toLocaleString()}</span>
             </div>
-            <button class="delete-btn text-slate-400 hover:text-rose-500 transition-colors p-1 -mt-1 -mr-1 text-sm leading-none" title="刪除此紀錄">
+            <button class="delete-btn text-stone-400 hover:text-orange-600 transition-colors p-1 -mt-1 -mr-1 text-sm leading-none" title="${translations[currentLang]['delete_title']}" data-i18n-title="delete_title">
                 &#10005;
             </button>
         </div>
         <div class="flex justify-between items-end">
-            <div class="font-mono text-sm text-slate-700">
-                <p>明信片數量:</p>
-                <p class="font-bold">總計:</p>
+            <div class="font-mono text-sm text-stone-700">
+                <p data-i18n="qty_text">${translations[currentLang]['qty_text']}</p>
+                <p class="font-bold" data-i18n="total_text">${translations[currentLang]['total_text']}</p>
             </div>
             <div class="text-right">
-                <p class="font-mono text-sm text-slate-700">${quantity}</p>
-                <p class="font-bold text-lg text-blue-800">${currencySymbol}${fare}</p>
+                <p class="font-mono text-sm text-stone-700">${quantity}</p>
+                <p class="font-bold text-lg text-emerald-700">${currencySymbol}${fare}</p>
             </div>
         </div>
     `;
@@ -184,7 +118,7 @@ function calculateFare() {
         listItem.remove();
         // 如果刪除後沒有其他紀錄，則重新顯示「尚無查詢紀錄」
         if (historyList.children.length === 0) {
-            historyList.innerHTML = '<li id="emptyMsg" class="text-slate-400 text-center italic mt-4">尚無查詢紀錄</li>';
+                historyList.innerHTML = `<li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
         }
     });
 
@@ -193,11 +127,73 @@ function calculateFare() {
 
 function clearHistory() {
     const historyList = document.getElementById('historyList');
-    historyList.innerHTML = '<li id="emptyMsg" class="text-slate-400 text-center italic mt-4">尚無查詢紀錄</li>';
+    historyList.innerHTML = `<li id="emptyMsg" class="text-stone-500 text-center italic mt-4" data-i18n="empty_msg">${translations[currentLang]['empty_msg']}</li>`;
+}
+
+function updateLanguage() {
+    // 翻譯一般文字
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
+    });
+
+    // 翻譯輸入框佔位符
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[currentLang][key]) el.placeholder = translations[currentLang][key];
+    });
+    
+    // 翻譯 Hover 的標題提醒
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (translations[currentLang][key]) el.title = translations[currentLang][key];
+    });
+
+    // 紀錄當前下拉選單的選取值並重新渲染
+    const originSelect = document.getElementById('originCountry');
+    const destSelect = document.getElementById('destCountry');
+    const currentOrigin = originSelect.value;
+    const currentDest = destSelect.value;
+
+    originSelect.innerHTML = '';
+    destSelect.innerHTML = '';
+
+    for (const code in countryNames[currentLang]) {
+        const option1 = document.createElement('option');
+        option1.value = code;
+        option1.textContent = countryNames[currentLang][code];
+        originSelect.appendChild(option1);
+
+        const option2 = option1.cloneNode(true);
+        destSelect.appendChild(option2);
+    }
+
+    if (currentOrigin) originSelect.value = currentOrigin;
+    if (currentDest) destSelect.value = currentDest;
+
+    // 翻譯歷史紀錄中的航線名稱
+    document.querySelectorAll('.route-text').forEach(el => {
+        const origin = el.getAttribute('data-origin');
+        const dest = el.getAttribute('data-dest');
+        el.innerHTML = `${getCountryName(origin)} &rarr; ${getCountryName(dest)}`;
+    });
+    
+    // 更新語言切換按鈕本身文字
+    const langBtn = document.getElementById('langToggleBtn');
+    if(langBtn) langBtn.textContent = translations[currentLang]['lang_toggle'];
+
+    updatePreviewFare();
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    updateLanguage();
 }
 
 // --- NEW: Add event listeners for real-time updates ---
 document.addEventListener('DOMContentLoaded', () => {
+    updateLanguage();
+
     const controls = [
         document.getElementById('originCountry'),
         document.getElementById('destCountry'),
@@ -207,7 +203,4 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.forEach(control => {
         control.addEventListener('input', updatePreviewFare);
     });
-
-    // Initial calculation on page load
-    updatePreviewFare();
 });
