@@ -1,9 +1,56 @@
 // 郵資費率表 (單位：元/張)
 // 根據中華郵政國際明信片資費更新：美國 11 元，日本及韓國 (亞洲) 10 元
 const fareTable = {
+    'TW-TW': 5,    // 台灣國內
     'TW-US': 11,
     'TW-JP': 10,
-    'TW-KR': 10
+    'TW-KR': 10,
+    'TW-EU': 12, // 歐洲
+    'TW-HK': 6,  // 香港
+    'TW-CA': 11, // 加拿大
+    'TW-DE': 12, // 德國 (同歐洲費率)
+    'US-US': 0.61, // 美國國內
+    'US-TW': 1.70,
+    'US-JP': 1.70,
+    'US-KR': 1.70,
+    'US-EU': 1.70,
+    'US-HK': 1.70,
+    'US-CA': 1.70,
+    'US-DE': 1.70,
+    'JP-JP': 85,   // 日本國內
+    'JP-TW': 100,
+    'JP-US': 100,
+    'JP-KR': 100,
+    'JP-EU': 100,
+    'JP-HK': 100,
+    'JP-CA': 100,
+    'JP-DE': 100,
+    'KR-KR': 400,  // 韓國國內
+    'KR-TW': 430,
+    'KR-US': 430,
+    'KR-JP': 430,
+    'KR-EU': 430,
+    'KR-HK': 430,
+    'KR-CA': 430,
+    'KR-DE': 430,
+    'CA-CA': 1.44, // 加拿大國內 (2026 標準郵資)
+    'CA-TW': 3.65, // 加拿大寄國際
+    'CA-US': 1.75, // 加拿大寄美國
+    'CA-JP': 3.65,
+    'CA-KR': 3.65,
+    'CA-EU': 3.65,
+    'CA-HK': 3.65,
+    'CA-DE': 3.65,
+    'DE-DE': 0.95, // 德國國內明信片
+    'DE-TW': 1.25, // 德國寄國際明信片
+    'DE-US': 1.25,
+    'DE-JP': 1.25,
+    'DE-KR': 1.25,
+    'DE-EU': 1.25,
+    'DE-HK': 1.25,
+    'DE-CA': 1.25,
+    'EU-EU': 1.20, // 歐洲境內 (預設參考)
+    'HK-HK': 2.2   // 香港國內
 };
 const defaultFare = 10; // 找不到對應航線時的預設費率
 
@@ -12,9 +59,29 @@ function getCountryName(code) {
         'TW': '台灣',
         'US': '美國',
         'JP': '日本',
-        'KR': '韓國'
+        'KR': '韓國',
+        'EU': '歐洲',
+        'HK': '香港'
+        'HK': '香港',
+        'CA': '加拿大',
+        'DE': '德國'
     };
     return names[code] || code;
+}
+
+function getCurrencySymbol(code) {
+    const symbols = {
+        'TW': 'NT$',
+        'US': '$',
+        'JP': '¥',
+        'KR': '₩',
+        'EU': '€',
+        'HK': 'HK$'
+        'HK': 'HK$',
+        'CA': 'C$',
+        'DE': '€'
+    };
+    return symbols[code] || '$';
 }
 
 // --- NEW: Function to calculate fare based on current inputs ---
@@ -26,7 +93,14 @@ function getFareFromInputs() {
 
     const routeKey = `${originCountry}-${destCountry}`;
     const unitFare = fareTable[routeKey] !== undefined ? fareTable[routeKey] : defaultFare;
-    return { fare: unitFare * quantity, quantity };
+    
+    // 處理小數點，確保美金費率 (如 1.70) 能正確顯示，同時解決 JavaScript 的浮點數誤差
+    let totalFare = unitFare * quantity;
+    totalFare = Number.isInteger(totalFare) ? totalFare : totalFare.toFixed(2);
+
+    const currencySymbol = getCurrencySymbol(originCountry);
+
+    return { fare: totalFare, quantity, currencySymbol };
 }
 
 // --- NEW: Function to update only the preview text ---
@@ -36,33 +110,20 @@ function updatePreviewFare(event) {
     const calcBtn = document.getElementById('calcBtn');
     const fareResult = document.getElementById('fareResult');
 
-    // 如果寄件地和收件地相同
-    if (originCountry === destCountry) {
-        // 只有在切換「國家」選單時才跳出 alert（避免改數量也狂跳）
-        if (event && (event.target.id === 'originCountry' || event.target.id === 'destCountry')) {
-            alert('提示：寄件地和收件地不可相同！');
-        }
-        calcBtn.disabled = true;
-        calcBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        fareResult.textContent = '⚠️ 寄件地和收件地不可相同';
-        fareResult.classList.remove('text-teal-700');
-        fareResult.classList.add('text-rose-600');
-        return;
-    } else {
-        calcBtn.disabled = false;
-        calcBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        fareResult.classList.remove('text-rose-600');
-        fareResult.classList.add('text-teal-700');
-    }
+    // 移除限制：現在允許寄件地與收件地相同，以計算國內郵資
+    calcBtn.disabled = false;
+    calcBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    fareResult.classList.remove('text-rose-600');
+    fareResult.classList.add('text-teal-700');
 
-    const { fare } = getFareFromInputs();
-    fareResult.textContent = `預估郵資: $${fare}`;
+    const { fare, currencySymbol } = getFareFromInputs();
+    fareResult.textContent = `預估郵資: ${currencySymbol}${fare}`;
 }
 
 function calculateFare() {
     // --- 信封飛出動畫效果 ---
     // (This function is now for adding to history and triggering the animation)
-    const { fare, quantity } = getFareFromInputs();
+    const { fare, quantity, currencySymbol } = getFareFromInputs();
 
     const envelope = document.getElementById('envelopeAnimation');
     if (envelope) {
@@ -113,7 +174,7 @@ function calculateFare() {
             </div>
             <div class="text-right">
                 <p class="font-mono text-sm text-slate-700">${quantity}</p>
-                <p class="font-bold text-lg text-blue-800">$${fare}</p>
+                <p class="font-bold text-lg text-blue-800">${currencySymbol}${fare}</p>
             </div>
         </div>
     `;
