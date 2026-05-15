@@ -1,6 +1,6 @@
 // 郵資費率表 (單位：元/張)
 // 根據中華郵政國際明信片資費更新：美國 11 元，日本及韓國 (亞洲) 10 元
-const fareTable = {
+let fareTable = {
     'TW-TW': 5,    // 台灣國內
     'TW-US': 11,
     'TW-JP': 10,
@@ -50,9 +50,118 @@ const fareTable = {
     'DE-HK': 1.25,
     'DE-CA': 1.25,
     'EU-EU': 1.20, // 歐洲境內 (預設參考)
-    'HK-HK': 2.2   // 香港國內
+    'HK-HK': 2.4   // 香港國內
 };
 const defaultFare = 10; // 找不到對應航線時的預設費率
+
+async function updateDynamicFares() {
+    // 從 Postcrossing 社區論壇抓取最新的郵資資訊，更新 fareTable
+    const url = 'https://community.postcrossing.com/t/current-prices-of-stamps-for-postcards-in-all-countries-territories-wiki/125.json';
+
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch: HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        // Post [0] 包含HTML内容，從中提取郵資資訊
+        const html = data.post_stream.posts[0].cooked;
+        
+        // 複製一份現有的費率表，以便更新
+        let dynamicFares = { ...fareTable };
+
+        // 定義一個通用的提取函數，根據正則表達式從 HTML 中提取費率
+        const extract = (regex, isFloat = false) => {
+            const match = html.match(regex);
+            if (!match) return null;
+            // Handle European formatting like "1,25 €"
+            let val = match[1].replace(',', '.');
+            return isFloat ? parseFloat(val) : parseInt(val, 10);
+        };
+
+        // 1. Taiwan
+        const twDom = extract(/Taiwan[\s\S]*?Domestic:\s*NT\$(\d+)/i);
+        const twHk = extract(/Taiwan[\s\S]*?HongKong.*?NT\$(\d+)/i);
+        const twAsia = extract(/Taiwan[\s\S]*?Rest of Asia Pacific:\s*NT\$(\d+)/i);
+        const twUsCa = extract(/Taiwan[\s\S]*?USA, Canada:\s*NT\$(\d+)/i);
+        const twWorld = extract(/Taiwan[\s\S]*?Rest of the world:\s*NT\$(\d+)/i);
+        
+        if (twDom) dynamicFares['TW-TW'] = twDom;
+        if (twHk) dynamicFares['TW-HK'] = twHk;
+        if (twAsia) { dynamicFares['TW-JP'] = twAsia; dynamicFares['TW-KR'] = twAsia; }
+        if (twUsCa) { dynamicFares['TW-US'] = twUsCa; dynamicFares['TW-CA'] = twUsCa; }
+        if (twWorld) { dynamicFares['TW-EU'] = twWorld; dynamicFares['TW-DE'] = twWorld; }
+
+        // 2. USA
+        const usDom = extract(/United States[\s\S]*?Domestic Postcards.*?:\s*(\d+)¢/i);
+        const usIntl = extract(/United States[\s\S]*?International:\s*\$(\d+\.\d+)/i, true);
+        if (usDom) dynamicFares['US-US'] = usDom / 100; // Convert ¢ to $
+        if (usIntl) {
+            Object.keys(dynamicFares).forEach(key => {
+                if (key.startsWith('US-') && key !== 'US-US') dynamicFares[key] = usIntl;
+            });
+        }
+
+        // 3. Japan
+        const jpDom = extract(/Japan[\s\S]*?Domestic.*?: ¥(\d+)/i);
+        const jpIntl = extract(/Japan[\s\S]*?International.*?: \(air\) ¥(\d+)/i);
+        if (jpDom) dynamicFares['JP-JP'] = jpDom;
+        if (jpIntl) {
+            Object.keys(dynamicFares).forEach(key => {
+                if (key.startsWith('JP-') && key !== 'JP-JP') dynamicFares[key] = jpIntl;
+            });
+        }
+
+        // 4. South Korea
+        const krIntl = extract(/Korea \(South\)[\s\S]*?Air Mail: ₩(\d+)/i);
+        if (krIntl) {
+            Object.keys(dynamicFares).forEach(key => {
+                if (key.startsWith('KR-') && key !== 'KR-KR') dynamicFares[key] = krIntl;
+            });
+        }
+
+        // 5. Canada
+        const caDom = extract(/Canada[\s\S]*?Domestic: \$(\d+\.\d+)/i, true);
+        const caUs = extract(/Canada[\s\S]*?USA: \$(\d+\.\d+)/i, true);
+        const caWorld = extract(/Canada[\s\S]*?World: \$(\d+\.\d+)/i, true);
+        if (caDom) dynamicFares['CA-CA'] = caDom;
+        if (caUs) dynamicFares['CA-US'] = caUs;
+        if (caWorld) {
+            Object.keys(dynamicFares).forEach(key => {
+                if (key.startsWith('CA-') && key !== 'CA-CA' && key !== 'CA-US') dynamicFares[key] = caWorld;
+            });
+        }
+
+        // 6. Germany
+        const deDom = extract(/Germany[\s\S]*?Domestic.*?<\/td>\s*<td>(\d+,\d+)\s*€/i, true);
+        const deIntl = extract(/Germany[\s\S]*?International.*?<\/td>\s*<td>(\d+,\d+)\s*€/i, true);
+        if (deDom) dynamicFares['DE-DE'] = deDom;
+        if (deIntl) {
+            Object.keys(dynamicFares).forEach(key => {
+                if (key.startsWith('DE-') && key !== 'DE-DE') dynamicFares[key] = deIntl;
+            });
+        }
+
+        // 7. Hong Kong
+        const hkDom = extract(/Hong Kong[\s\S]*?Domestic: (\d+\.\d+) HKD/i, true);
+        if (hkDom) dynamicFares['HK-HK'] = hkDom;
+
+        // 將更新後的動態費率表賦值回全局 fareTable
+        fareTable = dynamicFares;
+
+        console.log("=== DYNAMIC DATA FETCHED SUCCESSFULLY ===");
+        console.log("For a future replacement of static data, use this:");
+        console.log(JSON.stringify(fareTable, null, 4).replace(/"/g, "'"));
+
+    } catch (error) {
+        console.warn("Failed to fetch dynamic data. Utilizing static data as fallback.", error.message);
+    }
+}
+
+// 頁面載入時立即更新動態費率
+updateDynamicFares();
 
 const translations = {
     'zh': {
